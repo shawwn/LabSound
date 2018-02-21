@@ -1,0 +1,24 @@
+{
+  "name": "labsound",
+  "version": "0.0.0",
+  "description": "<p align=\"center\">   <img src=\"https://raw.githubusercontent.com/LabSound/LabSound/master/assets/images/labsound_4x3.png\"/> </p>",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node-gyp rebuild"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LabSound/LabSound.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "gypfile": true,
+  "bugs": {
+    "url": "https://github.com/LabSound/LabSound/issues"
+  },
+  "homepage": "https://github.com/LabSound/LabSound#readme"
+}
