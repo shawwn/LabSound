@@ -12,6 +12,11 @@
         '<(module_root_dir)/osx/build/Release',
       ],
       'libraries': [
+        '-framework Cocoa',
+        '-framework Accelerate',
+        '-framework CoreAudio',
+        '-framework AudioUnit',
+        '-framework AudioToolbox',
         '-llabsound',
       ],
       'link_settings': {
