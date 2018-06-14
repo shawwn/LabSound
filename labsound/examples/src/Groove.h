@@ -106,9 +106,7 @@ struct MoogFilter
     
     float p, k, t1, t2, r, x;
     
-    const float sampleRate = 44100.00f;
-    
-    float process(double cutoff, double resonance, double sample)
+    float process(float sampleRate, double cutoff, double resonance, double sample)
     {
         cutoff = 2.0 * cutoff / sampleRate;
         
@@ -172,7 +170,9 @@ struct GrooveApp : public LabSoundExampleApp
             grooveBox = std::make_shared<FunctionNode>(2);
             grooveBox->setFunction([&](ContextRenderLock& r, FunctionNode * self, int channel, float * samples, size_t framesToProcess)
             {
-                double dt = 1.0 / r.context()->sampleRate(); // time duration of one sample
+                const float sampleRate = r.context()->sampleRate();
+    
+                double dt = 1.0 / sampleRate; // time duration of one sample
                 double now = self->now();
                 
                 int nextMeasure = int((now / 2)) % bassline.size();
@@ -194,11 +194,11 @@ struct GrooveApp : public LabSoundExampleApp
                     // Bass
                     bassWaveform = quickSaw(bn, now) * 1.9f + quickSqr(bn / 2.f, now) * 1.0f + quickSin(bn / 2.f, now) * 2.2f + quickSqr(bn * 3.f, now) * 3.f;
                     percussiveWaveform = perc(bassWaveform / 3.f, 48.0f, fmod(now, 0.125f), now) * 1.0f;
-                    bassSample = lp_a[channel].process(1000.f + (lfo_b * 140.f), quickSin(0.5f, now + 0.75f) * 0.2f, percussiveWaveform);
+                    bassSample = lp_a[channel].process(sampleRate, 1000.f + (lfo_b * 140.f), quickSin(0.5f, now + 0.75f) * 0.2f, percussiveWaveform);
                    
                     // Pad
                     padWaveform = 5.1f * quickSaw(note(p[0], 1.f), now) + 3.9f * quickSaw(note(p[1], 2.f), now) + 4.0f * quickSaw(note(p[2], 1.f), now) + 3.0f * quickSqr(note(p[3], 0.0f), now);
-                    padSample = 1.0f - ((quickSin(2.0f, now) * 0.28f) + 0.5f) * fasthp_c[channel](0.5f, lp_c[channel].process(1100.f + (lfo_a * 150.f), 0.05f, padWaveform * 0.03f));
+                    padSample = 1.0f - ((quickSin(2.0f, now) * 0.28f) + 0.5f) * fasthp_c[channel](0.5f, lp_c[channel].process(sampleRate, 1100.f + (lfo_a * 150.f), 0.05f, padWaveform * 0.03f));
                     
                     // Kick
                     kickWaveform = hardClip(0.37f, quickSin(note(7.0f, -1.f), now)) * 2.0f + hardClip(0.07f, quickSaw(note(7.03f,-1.0f), now * 0.2f)) * 4.00f;
@@ -206,7 +206,7 @@ struct GrooveApp : public LabSoundExampleApp
                     
                     // Synth
                     synthWaveform = quickSaw(mn, now + 1.0f) + quickSqr(mn * 2.02f, now) * 0.4f + quickSqr(mn * 3.f, now + 2.f);
-                    synthPercussive = lp_b[channel].process(3200.0f + (lfo_a * 400.f), 0.1f, perc(synthWaveform, 1.6f, fmod(now, 4.f), now) * 1.7f) * 1.8f;
+                    synthPercussive = lp_b[channel].process(sampleRate, 3200.0f + (lfo_a * 400.f), 0.1f, perc(synthWaveform, 1.6f, fmod(now, 4.f), now) * 1.7f) * 1.8f;
                     synthDegradedWaveform = synthPercussive * quickSin(note(5.0f, 2.0f), now);
                     synthSample = 0.4f * synthPercussive + 0.05f * synthDegradedWaveform;
                     

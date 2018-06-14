@@ -21,7 +21,7 @@ class AudioDestinationWin : public AudioDestination
 
 public:
 
-    AudioDestinationWin(AudioIOCallback &, float sampleRate);
+    AudioDestinationWin(AudioIOCallback &, unsigned numberOfOutputChannels, float sampleRate);
     virtual ~AudioDestinationWin();
 
     virtual void start() override;

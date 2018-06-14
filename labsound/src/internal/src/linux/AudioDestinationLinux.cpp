@@ -9,23 +9,40 @@
 #include "LabSound/core/AudioIOCallback.h"
 #include "LabSound/extended/Logging.h"
 
+#include <rtaudio/RtAudio.h>
+
 namespace lab
 {
+
+static int
+NumDefaultOutputChannels() {
+  RtAudio audio;
+  size_t n = audio.getDeviceCount();
+
+  size_t i = 0;
+  for (size_t i = 0; i < n; i++) {
+    RtAudio::DeviceInfo info(audio.getDeviceInfo(i));
+    if (info.isDefaultOutput) {
+      return info.outputChannels;
+    }
+  }
+  return 2;
+}
 
 const float kLowThreshold = -1.0f;
 const float kHighThreshold = 1.0f;
 
 AudioDestination * AudioDestination::MakePlatformAudioDestination(AudioIOCallback & callback, unsigned numberOfOutputChannels, float sampleRate)
 {
-    return new AudioDestinationLinux(callback, sampleRate);
+    return new AudioDestinationLinux(callback, numberOfOutputChannels, sampleRate);
 }
 
 unsigned long AudioDestination::maxChannelCount()
 {
-    return 2;
+    return NumDefaultOutputChannels();
 }
 
-AudioDestinationLinux::AudioDestinationLinux(AudioIOCallback & callback, float sampleRate) : m_callback(callback)
+AudioDestinationLinux::AudioDestinationLinux(AudioIOCallback & callback, unsigned numberOfOutputChannels, float sampleRate) : m_callback(callback)
 {
     m_sampleRate = sampleRate;
     m_renderBus.setSampleRate(m_sampleRate);
@@ -51,7 +68,7 @@ void AudioDestinationLinux::configure()
 
     RtAudio::StreamParameters outputParams;
     outputParams.deviceId = dac->getDefaultOutputDevice();
-    outputParams.nChannels = 2;
+    outputParams.nChannels = channelCount();
     outputParams.firstChannel = 0;
 
 	auto deviceInfo = dac->getDeviceInfo(outputParams.deviceId);

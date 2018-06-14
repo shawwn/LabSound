@@ -1,12 +1,13 @@
 #include <AudioContext.h>
+#include <Audio.h>
 
 namespace webaudio {
 
 unique_ptr<lab::AudioContext> _defaultAudioContext = nullptr;
 
-lab::AudioContext *getDefaultAudioContext(float sampleRate) {
+lab::AudioContext *getDefaultAudioContext( unsigned numberOfChannels, float sampleRate ) {
   if (!_defaultAudioContext) {
-    _defaultAudioContext = lab::MakeRealtimeAudioContext(sampleRate);
+    _defaultAudioContext = lab::MakeRealtimeAudioContext( numberOfChannels, sampleRate );
 
     atexit([]() {
       _defaultAudioContext.reset();
@@ -15,13 +16,21 @@ lab::AudioContext *getDefaultAudioContext(float sampleRate) {
   return _defaultAudioContext.get();
 }
 
-AudioContext::AudioContext(float sampleRate) {
-  audioContext = getDefaultAudioContext(sampleRate);
+lab::AudioContext *getDefaultAudioContext() {
+	if ( !_defaultAudioContext ) {
+    printf("%d, %f\n", Audio::DefaultOutputChannels(), Audio::DefaultOutputSampleRate() );
+		return getDefaultAudioContext( Audio::DefaultOutputChannels(), Audio::DefaultOutputSampleRate() );
+	}
+	return _defaultAudioContext.get();
+}
+
+AudioContext::AudioContext(unsigned numberOfChannels, float sampleRate) {
+  audioContext = getDefaultAudioContext(numberOfChannels, sampleRate);
 }
 
 AudioContext::~AudioContext() {}
 
-Handle<Object> AudioContext::Initialize(Isolate *isolate, Local<Value> audioListenerCons, Local<Value> audioSourceNodeCons, Local<Value> audioDestinationNodeCons, Local<Value> gainNodeCons, Local<Value> analyserNodeCons, Local<Value> pannerNodeCons, Local<Value> audioBufferCons, Local<Value> audioBufferSourceNodeCons, Local<Value> audioProcessingEventCons, Local<Value> stereoPannerNodeCons, Local<Value> oscillatorNodeCons, Local<Value> scriptProcessorNodeCons, Local<Value> microphoneMediaStreamCons) {
+Handle<Object> AudioContext::Initialize(Isolate *isolate, Local<Value> audioCons, Local<Value> audioListenerCons, Local<Value> audioSourceNodeCons, Local<Value> audioDestinationNodeCons, Local<Value> gainNodeCons, Local<Value> analyserNodeCons, Local<Value> pannerNodeCons, Local<Value> audioBufferCons, Local<Value> audioBufferSourceNodeCons, Local<Value> audioProcessingEventCons, Local<Value> stereoPannerNodeCons, Local<Value> oscillatorNodeCons, Local<Value> scriptProcessorNodeCons, Local<Value> microphoneMediaStreamCons) {
   Nan::EscapableHandleScope scope;
 
   // constructor
@@ -201,11 +210,13 @@ NAN_METHOD(AudioContext::New) {
   }
 
   Local<Object> options = info[0]->IsObject() ? Local<Object>::Cast(info[0]) : Nan::New<Object>();
-  Local<Value> sampleRateValue = options->Get(JS_STR("sampleRate"));
-  float sampleRate = sampleRateValue->IsNumber() ? sampleRateValue->NumberValue() : lab::DefaultSampleRate;
+  Local<Value> channelsValue = options->Get(JS_STR("channels"));
+  unsigned channels = channelsValue->IsNumber() ? channelsValue->NumberValue() : Audio::DefaultOutputChannels();
+  Local<Value> sampleRateValue = options->Get( JS_STR( "sampleRate" ) );
+  float sampleRate = sampleRateValue->IsNumber() ? sampleRateValue->NumberValue() : Audio::DefaultOutputSampleRate();
 
   Local<Object> audioContextObj = info.This();
-  AudioContext *audioContext = new AudioContext(sampleRate);
+  AudioContext *audioContext = new AudioContext(channels, sampleRate);
   audioContext->Wrap(audioContextObj);
 
   Local<Function> audioDestinationNodeConstructor = Local<Function>::Cast(audioContextObj->Get(JS_STR("constructor"))->ToObject()->Get(JS_STR("AudioDestinationNode")));

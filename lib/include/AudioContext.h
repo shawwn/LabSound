@@ -24,11 +24,11 @@ using namespace node;
 
 namespace webaudio {
   
-lab::AudioContext *getDefaultAudioContext(float sampleRate = lab::DefaultSampleRate);
+lab::AudioContext *getDefaultAudioContext();
 
 class AudioContext : public ObjectWrap {
 public:
-  static Handle<Object> Initialize(Isolate *isolate, Local<Value> audioListenerCons, Local<Value> audioSourceNodeCons, Local<Value> audioDestinationNodeCons, Local<Value> gainNodeCons, Local<Value> analyserNodeCons, Local<Value> pannerNodeCons, Local<Value> audioBufferCons, Local<Value> audioBufferSourceNodeCons, Local<Value> audioProcessingEventCons, Local<Value> stereoPannerNodeCons, Local<Value> oscillatorNodeCons, Local<Value> scriptProcessorNodeCons, Local<Value> microphoneMediaStreamCons);
+  static Handle<Object> Initialize(Isolate *isolate, Local<Value> audioCons, Local<Value> audioListenerCons, Local<Value> audioSourceNodeCons, Local<Value> audioDestinationNodeCons, Local<Value> gainNodeCons, Local<Value> analyserNodeCons, Local<Value> pannerNodeCons, Local<Value> audioBufferCons, Local<Value> audioBufferSourceNodeCons, Local<Value> audioProcessingEventCons, Local<Value> stereoPannerNodeCons, Local<Value> oscillatorNodeCons, Local<Value> scriptProcessorNodeCons, Local<Value> microphoneMediaStreamCons);
   void Close();
   Local<Object> CreateMediaElementSource(Local<Function> audioDestinationNodeConstructor, Local<Object> mediaElement, Local<Object> audioContextObj);
   Local<Object> CreateMediaStreamSource(Local<Function> audioSourceNodeConstructor, Local<Object> mediaStream, Local<Object> audioContextObj);
@@ -65,7 +65,7 @@ protected:
   static NAN_GETTER(CurrentTimeGetter);
   static NAN_GETTER(SampleRateGetter);
 
-  AudioContext(float sampleRate);
+  AudioContext(unsigned numberOfChannels, float sampleRate);
   ~AudioContext();
 
 protected:

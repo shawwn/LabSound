@@ -26,25 +26,11 @@ namespace lab
         return inputNode;
     }
 
-    std::unique_ptr<lab::AudioContext> MakeRealtimeAudioContext(float sampleRate)
+    std::unique_ptr<lab::AudioContext> MakeRealtimeAudioContext(unsigned numberOfChannels, float sampleRate)
     {
         LOG("Initialize Realtime Context");
         std::unique_ptr<AudioContext> ctx(new lab::AudioContext(false));
-        ctx->setDestinationNode(std::make_shared<lab::DefaultAudioDestinationNode>(ctx.get(), sampleRate));
-        ctx->lazyInitialize();
-        return ctx;
-    }
-
-    std::unique_ptr<lab::AudioContext> MakeOfflineAudioContext(float recordTimeMilliseconds)
-    {
-        LOG("Initialize Offline Context");
-
-        // @tofix - hardcoded parameters
-        const float sampleRate = 44100;
-        float secondsToRun = (float) recordTimeMilliseconds * 0.001f;
-
-        std::unique_ptr<AudioContext> ctx(new lab::AudioContext(true));
-        ctx->setDestinationNode(std::make_shared<lab::OfflineAudioDestinationNode>(ctx.get(), sampleRate, secondsToRun, 2));
+        ctx->setDestinationNode(std::make_shared<lab::DefaultAudioDestinationNode>(ctx.get(), numberOfChannels, sampleRate));
         ctx->lazyInitialize();
         return ctx;
     }

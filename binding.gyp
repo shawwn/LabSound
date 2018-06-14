@@ -2,6 +2,7 @@
   'targets': [
     {
       'target_name': 'webaudio',
+      'defines': ['_ITERATOR_DEBUG_LEVEL=0'],
       'sources': [
         'main.cpp',
         "<!@(node -p \"require('fs').readdirSync('./lib/src').map(f=>'lib/src/'+f).join(' ')\")"
@@ -36,10 +37,45 @@
           ],
         }],
         ['OS=="win"', {
-          'library_dirs': [
-            '<(module_root_dir)/labsound/build/x64/Release',
-            "<!(node -e \"console.log(require.resolve('native-video-deps').slice(0, -9) + '/lib/win')\")",
-          ],
+        'configurations': {
+            'Debug': {
+                'msvs_settings': {
+                            'VCCLCompilerTool': {
+                                # 'RuntimeLibrary': '3' # /MDd
+                                'RuntimeLibrary': '2' # /MD
+                    },
+                },
+                'library_dirs': [
+                  '<(module_root_dir)/labsound/build/x64/Debug',
+                "<!(node -e \"console.log(require.resolve('native-video-deps').slice(0, -9) + '/lib/win')\")",
+                ],
+                'copies': [{
+                  'destination': '<(module_root_dir)/build/Debug/',
+                }],
+            },
+            'Release': {
+                'msvs_settings': {
+                            'VCCLCompilerTool': {
+                                'RuntimeLibrary': '2' # /MD
+                    },
+                },
+                'library_dirs': [
+                  '<(module_root_dir)/labsound/build/x64/Release',
+                "<!(node -e \"console.log(require.resolve('native-video-deps').slice(0, -9) + '/lib/win')\")",
+                ],
+                'copies': [{
+                  'destination': '<(module_root_dir)/build/Release/',
+                }],
+        },
+         'msvs_settings': {
+              'VCCLCompilerTool': {
+                 'AdditionalOptions': [
+                  '/GR',
+                  '/MD',
+                  '/EHsc'
+                ]
+              },
+          },
           'libraries': [
             'LabSound.lib',
             'avformat.lib',

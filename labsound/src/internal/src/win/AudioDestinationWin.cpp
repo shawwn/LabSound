@@ -9,23 +9,45 @@
 #include "LabSound/core/AudioIOCallback.h"
 #include "LabSound/extended/Logging.h"
 
+#include <rtaudio/RtAudio.h>
+
 namespace lab
 {
+
+static int
+NumDefaultOutputChannels() {
+  RtAudio audio;
+  size_t n = audio.getDeviceCount();
+
+  size_t i = 0;
+  for (size_t i = 0; i < n; i++) {
+    RtAudio::DeviceInfo info(audio.getDeviceInfo(i));
+    if (info.isDefaultOutput) {
+      printf("%d channels\n", info.outputChannels);
+      return info.outputChannels;
+    }
+  }
+  return 2;
+}
 
 const float kLowThreshold = -1.0f;
 const float kHighThreshold = 1.0f;
 
 AudioDestination * AudioDestination::MakePlatformAudioDestination(AudioIOCallback & callback, unsigned numberOfOutputChannels, float sampleRate)
 {
-    return new AudioDestinationWin(callback, sampleRate);
+    return new AudioDestinationWin(callback, numberOfOutputChannels, sampleRate);
 }
 
 unsigned long AudioDestination::maxChannelCount()
 {
-    return 2;
+    return NumDefaultOutputChannels();
 }
 
-AudioDestinationWin::AudioDestinationWin(AudioIOCallback & callback, float sampleRate) : m_callback(callback)
+AudioDestinationWin::AudioDestinationWin(AudioIOCallback & callback, unsigned numberOfOutputChannels, float sampleRate)
+  : m_callback(callback)
+  , m_renderBus(numberOfOutputChannels, AudioNode::ProcessingSizeInFrames, false)
+  , m_inputBus(1, AudioNode::ProcessingSizeInFrames, false)
+
 {
     m_sampleRate = sampleRate;
     m_renderBus.setSampleRate(m_sampleRate);
@@ -51,7 +73,7 @@ void AudioDestinationWin::configure()
 
     RtAudio::StreamParameters outputParams;
     outputParams.deviceId = dac->getDefaultOutputDevice();
-    outputParams.nChannels = 2;
+    outputParams.nChannels = NumDefaultOutputChannels();
     outputParams.firstChannel = 0;
 
 	auto deviceInfo = dac->getDeviceInfo(outputParams.deviceId);
@@ -112,8 +134,9 @@ void AudioDestinationWin::render(int numberOfFrames, void * outputBuffer, void *
     // Inform bus to use an externally allocated buffer from rtaudio
     if (m_renderBus.isFirstTime())
     {
-        m_renderBus.setChannelMemory(0, myOutputBufferOfFloats, numberOfFrames);
-        m_renderBus.setChannelMemory(1, myOutputBufferOfFloats + (numberOfFrames), numberOfFrames);
+      for (unsigned i = 0; i < m_renderBus.numberOfChannels(); ++i) {
+        m_renderBus.setChannelMemory(i, myOutputBufferOfFloats + i*(numberOfFrames), numberOfFrames);
+      }
     }
 
     if (m_inputBus.isFirstTime())
@@ -137,7 +160,7 @@ int outputCallback(void * outputBuffer, void * inputBuffer, unsigned int nBuffer
     float *fBufOut = (float*) outputBuffer;
 
     // Buffer is nBufferFrames * channels
-    memset(fBufOut, 0, sizeof(float) * nBufferFrames * 2);
+    memset(fBufOut, 0, sizeof(float) * nBufferFrames * NumDefaultOutputChannels());
 
     AudioDestinationWin * audioDestination = static_cast<AudioDestinationWin*>(userData);
 

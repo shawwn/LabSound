@@ -33,6 +33,45 @@ Handle<Object> Audio::Initialize(Isolate *isolate) {
   return scope.Escape(ctorFn);
 }
 
+int
+Audio::DefaultOutputChannels() {
+  RtAudio audio;
+  size_t n = audio.getDeviceCount();
+
+  size_t i = 0;
+  for (size_t i = 0; i < n; i++) {
+    RtAudio::DeviceInfo info(audio.getDeviceInfo(i));
+    if (info.isDefaultOutput) {
+      return info.outputChannels;
+    }
+  }
+  return 2;
+}
+
+float
+Audio::DefaultOutputSampleRate() {
+  RtAudio audio;
+  size_t n = audio.getDeviceCount();
+
+  size_t i = 0;
+  for (size_t i = 0; i < n; i++) {
+    RtAudio::DeviceInfo info(audio.getDeviceInfo(i));
+    if (info.isDefaultOutput) {
+      for (auto rate : info.sampleRates) {
+        if (rate == info.preferredSampleRate) {
+          return rate;
+        }
+      }
+      for (auto rate : info.sampleRates) {
+        if (rate == 48000) {
+          return rate;
+        }
+      }
+    }
+  }
+  return 44100;
+}
+
 NAN_METHOD(Audio::GetDevices) {
   RtAudio audio;
   size_t n = audio.getDeviceCount();

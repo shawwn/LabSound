@@ -124,7 +124,8 @@ bool HRTFElevation::calculateKernelsForAzimuthElevation(HRTFDatabaseInfo * info,
     uint32_t expectedLength = 256;
 
     // Check number of channels and length.  For now these are fixed and known.
-    bool isBusGood = responseLength == expectedLength && impulseResponse->numberOfChannels() == 2;
+    // TODO: 5.1, 7.1
+    bool isBusGood = responseLength == expectedLength && impulseResponse->numberOfChannels() == CHANNELS_STEREO;
 
     ASSERT(isBusGood);
     if (!isBusGood)

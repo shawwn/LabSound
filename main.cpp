@@ -22,18 +22,11 @@ using namespace node;
 
 namespace webaudio {
   
-unique_ptr<lab::AudioContext> defaultAudioContext;
-
 void Init(Handle<Object> exports) {
   Isolate *isolate = Isolate::GetCurrent();
-
-  defaultAudioContext = lab::MakeRealtimeAudioContext();
-
-  atexit([]() {
-    defaultAudioContext.reset();
-  });
   
-  exports->Set(JS_STR("Audio"), Audio::Initialize(isolate));
+  Local<Value> audioCons = Audio::Initialize(isolate);
+  exports->Set(JS_STR("Audio"), audioCons);
   Local<Value> audioParamCons = AudioParam::Initialize(isolate);
   exports->Set(JS_STR("AudioParam"), audioParamCons);
   Local<Value> fakeAudioParamCons = FakeAudioParam::Initialize(isolate);
@@ -64,7 +57,7 @@ void Init(Handle<Object> exports) {
   exports->Set(JS_STR("ScriptProcessorNode"), scriptProcessorNodeCons);
   Local<Value> microphoneMediaStreamCons = MicrophoneMediaStream::Initialize(isolate);
   exports->Set(JS_STR("MicrophoneMediaStream"), microphoneMediaStreamCons);
-  exports->Set(JS_STR("AudioContext"), AudioContext::Initialize(isolate, audioListenerCons, audioSourceNodeCons, audioDestinationNodeCons, gainNodeCons, analyserNodeCons, pannerNodeCons, audioBufferCons, audioBufferSourceNodeCons, audioProcessingEventCons, stereoPannerNodeCons, oscillatorNodeCons, scriptProcessorNodeCons, microphoneMediaStreamCons));
+  exports->Set(JS_STR("AudioContext"), AudioContext::Initialize(isolate, audioCons, audioListenerCons, audioSourceNodeCons, audioDestinationNodeCons, gainNodeCons, analyserNodeCons, pannerNodeCons, audioBufferCons, audioBufferSourceNodeCons, audioProcessingEventCons, stereoPannerNodeCons, oscillatorNodeCons, scriptProcessorNodeCons, microphoneMediaStreamCons));
 }
 NODE_MODULE(NODE_GYP_MODULE_NAME, Init)
 

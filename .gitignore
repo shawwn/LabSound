@@ -63,6 +63,8 @@ ipch/
 *.sdf
 *.cachefile
 win.vs2015/LabSound.VC.*
+labsound/win.vs2017/.vs
+labsound/win.vs2017/PredictedInputCache*.dat
 
 # Visual Studio profiler
 *.psess
@@ -109,3 +111,5 @@ CMakeCache.txt
 CMakeFiles
 labsound/bin
 labsound/cmake_install.cmake
+yarn.lock
+sounds

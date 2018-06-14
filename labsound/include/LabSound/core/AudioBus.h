@@ -125,8 +125,9 @@ protected:
     void speakersCopyFrom(const AudioBus&);
     void discreteCopyFrom(const AudioBus&);
     void speakersSumFrom(const AudioBus&);
-    void discreteSumFrom(const AudioBus&);
-    void speakersSumFrom5_1_ToMono(const AudioBus&);
+    void discreteSumFrom(const AudioBus &);
+    void speakersSumFrom5_1_ToMono(const AudioBus &);
+    void speakersSumFrom7_1_ToMono(const AudioBus &);
 
     size_t m_length;
 
