@@ -103,6 +103,10 @@ public:
     
     // Necessary to call when using an OfflineAudioDestinationNode
     void startRendering();
+
+    void queueInMainThread(std::function<void()> &&finishedCallback);
+    void runInMainThread();
+
     std::function<void()> offlineRenderCompleteCallback;
 
 private:
