@@ -28,6 +28,7 @@ namespace lab
 {
 concurrent_queue<msg_t> callbacks;
 
+thread_local bool ContextRenderLock::acquired = false;
 const uint32_t lab::AudioContext::maxNumberOfChannels = 32;
 
 // Constructor for realtime rendering

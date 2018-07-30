@@ -6,6 +6,7 @@
 // @tofix - webkit change e369924 adds backward playback, change not incorporated yet
 
 #include "LabSound/core/FinishableSourceNode.h"
+#include "LabSound/extended/AudioContextLock.h"
 
 using namespace std;
 
