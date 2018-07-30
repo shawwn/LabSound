@@ -103,9 +103,11 @@ public:
     
     // Necessary to call when using an OfflineAudioDestinationNode
     void startRendering();
-    std::function<void()> offlineRenderCompleteCallback;
 
-private:
+    void queueInMainThread(std::function<void()> &&finishedCallback);
+    void runInMainThread();
+
+    std::function<void()> offlineRenderCompleteCallback;
 
     std::mutex m_graphLock;
     std::mutex m_renderLock;
