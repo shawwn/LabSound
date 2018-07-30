@@ -13,12 +13,12 @@ namespace lab {
 
 class FinishableSourceNode : public SampledAudioNode {
 public:
-  FinishableSourceNode(std::function<void(ContextRenderLock &r)> &&finishedCallback);
+  FinishableSourceNode(std::function<void()> &&finishedCallback);
   ~FinishableSourceNode();
 protected:
   virtual void finish(ContextRenderLock &r);
 
-  std::function<void(ContextRenderLock &r)> finishedCallback;
+  std::function<void()> finishedCallback;
 };
 
 } // namespace lab

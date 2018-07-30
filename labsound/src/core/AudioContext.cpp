@@ -20,8 +20,13 @@
 #include <queue>
 #include <assert.h>
 
+struct msg_t {
+    std::function<void ()> task;
+};
+
 namespace lab
 {
+concurrent_queue<msg_t> callbacks;
 
 const uint32_t lab::AudioContext::maxNumberOfChannels = 32;
 
@@ -435,6 +440,19 @@ unsigned long AudioContext::activeSourceCount() const
 void AudioContext::startRendering()
 {
     destination()->startRendering();
+}
+
+void AudioContext::queueInMainThread(std::function<void()> &&finishedCallback) {
+    msg_t msg;
+    msg.task = std::move(finishedCallback);
+    callbacks.push(msg);
+}
+
+void AudioContext::runInMainThread() {
+    msg_t msg;
+    while (callbacks.try_pop(msg)) {
+        msg.task();
+    }
 }
 
 void AudioContext::incrementActiveSourceCount()

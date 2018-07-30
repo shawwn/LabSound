@@ -6,16 +6,18 @@
 // @tofix - webkit change e369924 adds backward playback, change not incorporated yet
 
 #include "LabSound/core/FinishableSourceNode.h"
+#include "LabSound/extended/AudioContextLock.h"
 
 using namespace std;
 
 namespace lab {
 
-FinishableSourceNode::FinishableSourceNode(std::function<void(ContextRenderLock &r)> &&finishedCallback) : finishedCallback(std::move(finishedCallback)) {}
+FinishableSourceNode::FinishableSourceNode(std::function<void()> &&finishedCallback)
+: finishedCallback(std::move(finishedCallback)) {}
 FinishableSourceNode::~FinishableSourceNode() {}
 void FinishableSourceNode::finish(ContextRenderLock &r) {
   SampledAudioNode::finish(r);
-  finishedCallback(r);
+  r.context()->queueInMainThread(std::move(finishedCallback));
 }
 
 } // namespace lab
