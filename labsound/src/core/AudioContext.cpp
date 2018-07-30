@@ -21,7 +21,7 @@
 #include <assert.h>
 
 struct msg_t {
-    std::__1::function<void ()> task;
+    std::function<void ()> task;
 };
 
 namespace lab
